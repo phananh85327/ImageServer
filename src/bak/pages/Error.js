@@ -9,7 +9,7 @@ const Error = () => {
 
     const handleNavigateView = () => {
         if (sessionStorage.getItem(FetchData.loginUser) === null) {
-            navigate('/');
+            navigate('/login');
         } else {
             navigate('/main');
         }

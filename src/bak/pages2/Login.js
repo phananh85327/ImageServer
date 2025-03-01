@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import UserRequestResponse from '../model/UserRequestResponse'
+import UserRequestResponse from '../api/UserRequestResponse'
 import FetchData from '../api/FetchData'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import '../css/Login.css'
 
 const Login = () => {
@@ -9,10 +9,10 @@ const Login = () => {
     const [userLoading, setUserLoading] = useState(false);
 
     const navigate = useNavigate();
+    const location = useLocation();
 
     // User effect
     useEffect(() => {
-        const url = new URL(FetchData.loginUrl);
         const fetchUserGet = async () => {
             const userEmail = document.getElementById('tbEmail');
             const userPassword = document.getElementById('tbPassword');
@@ -26,17 +26,22 @@ const Login = () => {
             } else if (userPassword.value.length < FetchData.userPassLength) {
                 userError.textContent = 'Minimum pass length is ' + FetchData.userPassLength;
             } else {
+                const url = new URL(FetchData.loginUrl);
                 const postUser = new UserRequestResponse()
                 postUser.email = userEmail.value;
                 postUser.password = await encryptPassword(userPassword.value);
-                const result = await FetchData.sendRequest(url.href, FetchData.httpPost, postUser);
-                if (result === null) {
-                    userError.textContent = 'Invalid email or password';
-                } else {
-                    userError.textContent = '';
+                const result = await FetchData.sendRequest(url.href, FetchData.httpPost, '', postUser);
+                if (result !== null) {
                     const user = UserRequestResponse.fromObject(result);
-                    sessionStorage.setItem(FetchData.loginUser, JSON.stringify(user));
-                    navigate('/main');
+                    if (user.error === '') {
+                        sessionStorage.setItem(FetchData.accessToken, result.accessToken);
+                        sessionStorage.setItem(FetchData.refreshToken, result.refreshToken);
+                        sessionStorage.setItem(FetchData.loginUser, JSON.stringify(user));
+                        navigate('/main');
+                    } else {
+                        userError.textContent = user.error;
+                        setUserLoading(false);
+                    }
                 }
             }
             setUserLoading(false);
@@ -59,10 +64,20 @@ const Login = () => {
         setUserLoading(true);
     }
 
+    const handleNavigateView = () => {
+        navigate('/view');
+    }
+
+    const handleErrorDisplay = () => {
+        const searchParams = new URLSearchParams(location.search);
+        var message = searchParams.get(FetchData.message);
+        return message ?? '';
+    }
+
     return (
         <div className='login-body'>
             <div className='login-centered-box'>
-                <h2 className='login-header'>Photo database</h2>
+                <h2 className='login-header'>Library management</h2>
                 <br />
                 <input id='tbEmail' className='login-input' placeholder='Email' type='text' />
                 <br />
@@ -77,11 +92,12 @@ const Login = () => {
                     ) : (
                         <>
                             <button id='btSubmit' className='login-button' onClick={handleSubmit}>Submit</button>
+                            <button className='login-button' onClick={handleNavigateView}>Back to view page</button>
                         </>
                     )
                 }
                 <br />
-                <label id='lbError' className='login-label-error' />
+                <label id='lbError' className='login-label-error'>{handleErrorDisplay()}</label>
             </div>
         </div>
     );

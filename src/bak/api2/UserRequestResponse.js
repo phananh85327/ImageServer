@@ -5,7 +5,7 @@ class UserRequestResponse {
         this.email = email;
         this.phone = phone;
         this.oldPass = oldPass;
-        this.pass = pass;
+        this.password = pass;
         this.userRole = userRole;
         this.isLocked = isLocked;
 

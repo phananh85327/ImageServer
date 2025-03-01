@@ -30,13 +30,15 @@ const Login = () => {
                 postUser.email = userEmail.value;
                 postUser.password = await encryptPassword(userPassword.value);
                 const result = await FetchData.sendRequest(url.href, FetchData.httpPost, postUser);
-                if (result === null) {
-                    userError.textContent = 'Invalid email or password';
-                } else {
-                    userError.textContent = '';
+                if (result !== null) {
                     const user = UserRequestResponse.fromObject(result);
-                    sessionStorage.setItem(FetchData.loginUser, JSON.stringify(user));
-                    navigate('/main');
+                    if (user.error === '') {
+                        sessionStorage.setItem(FetchData.loginUser, JSON.stringify(user));
+                        navigate('/main');
+                    } else {
+                        userError.textContent = user.error;
+                        setUserLoading(false);
+                    }
                 }
             }
             setUserLoading(false);
@@ -62,7 +64,7 @@ const Login = () => {
     return (
         <div className='login-body'>
             <div className='login-centered-box'>
-                <h2 className='login-header'>Photo database</h2>
+                <h2 className='login-header'>Library management</h2>
                 <br />
                 <input id='tbEmail' className='login-input' placeholder='Email' type='text' />
                 <br />

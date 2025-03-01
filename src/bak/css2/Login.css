@@ -64,7 +64,15 @@
 
 .login-label-error {
     color: red;
-    font-size: 2em;
+    font-size: 1.25em;
+    display: block;
+    background-color: transparent;
+    border: transparent;
+}
+
+.login-label-warning {
+    color: darkorange;
+    font-size: 1.25em;
     display: block;
     background-color: transparent;
     border: transparent;

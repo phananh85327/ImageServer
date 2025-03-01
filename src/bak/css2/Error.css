@@ -1,0 +1,39 @@
+.error-body {
+    background-image: url('../images/background.jpg');
+    background-repeat: repeat-y;
+    background-size: cover;
+    background-position: center;
+}
+
+.error-centered-box {
+    text-align: center;
+    padding: 1.25em;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 0.625em;
+}
+
+.error-header {
+    font-size: 4em;
+    color: #333;
+    margin-bottom: 0.5em;
+}
+
+.error-message {
+    font-size: 1.25em;
+    color: #666;
+    margin-bottom: 1em;
+}
+
+.error-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 0.75em 1.5em;
+    border: none;
+    border-radius: 0.25em;
+    font-size: 1.25em;
+    cursor: pointer;
+}
+
+.error-button:hover, .error-button:focus {
+    background-color: #45a049;
+}

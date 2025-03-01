@@ -8,8 +8,10 @@ const Error = () => {
     const currentPath = location.pathname
 
     const handleNavigateView = () => {
-        if (sessionStorage.getItem(FetchData.loginUser) === null) {
-            navigate('/');
+        if ((sessionStorage.getItem(FetchData.accessToken) === null)
+            || (sessionStorage.getItem(FetchData.refreshToken) === null)
+            || (sessionStorage.getItem(FetchData.loginUser) === null)) {
+            navigate('/view');
         } else {
             navigate('/main');
         }

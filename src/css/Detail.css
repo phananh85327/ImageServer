@@ -1,0 +1,224 @@
+.update-general-label {
+    flex-grow: 1;
+    text-align: left;
+    margin-right: 1em;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.update-general-label-error {
+    color: red;
+    font-size: 1.25em;
+    display: block;
+    background-color: transparent;
+    border: transparent;
+}
+
+.update-general-label-warning {
+    color: darkorange;
+    font-size: 1.25em;
+    display: block;
+    background-color: transparent;
+    border: transparent;
+}
+
+.update-container {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0em 1.25em;
+}
+
+.update-general-input {
+    width: 100%;
+    padding: 0.75em 1.25em;
+    margin: 0.5em 0;
+    box-sizing: border-box;
+    border: 0.125em solid #ccc;
+    border-radius: 0.25em;
+    font-size: 1.25em;
+}
+
+.update-general-input:focus {
+    border-color: #45a049;
+    box-shadow: 0 0 0.5em 0 #45a049;
+    outline: none;
+}
+
+.update-general-input:hover {
+    border-color: #888;
+}
+
+.update-general-input {
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.update-general-button {
+    padding: 0.625em 1.25em;
+    margin: 0.625em 0.3125em;
+    border: none;
+    border-radius: 0.3125em;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 1.25em;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.update-general-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.update-general-button:hover:not(:disabled) {
+    background-color: #45a049;
+}
+
+.update-general-checkbox {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.update-general-checkbox + .checkmark {
+    display: inline-block;
+    position: relative;
+    padding-left: 2.1875em;
+    margin-bottom: 0.75em;
+    cursor: pointer;
+    font-size: 1.375em;
+    user-select: none;
+}
+
+.update-general-checkbox + .checkmark::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 1.5625em;
+    width: 1.5625em;
+    background-color: #eee;
+    border-radius: 0.25em;
+    transition: background-color 0.3s;
+}
+
+.update-general-checkbox:hover + .checkmark::before {
+    background-color: #ccc;
+}
+
+.update-general-checkbox:checked + .checkmark::before {
+    background-color: #2196F3;
+}
+
+.update-general-checkbox + .checkmark::after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.update-general-checkbox:checked + .checkmark::after {
+    display: block;
+}
+
+.update-general-checkbox + .checkmark::after {
+    left: 0.5625em;
+    top: 0.3125em;
+    width: 0.3125em;
+    height: 0.625em;
+    border: solid white;
+    border-width: 0 0.1875em 0.1875em 0;
+    transform: rotate(45deg);
+}  
+
+.update-body {
+    background-image: url('../images/background.jpg');
+    background-repeat: repeat-y;
+    background-size: cover;
+    background-position: center;
+}
+
+.update-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding:  1em;
+    background-color: #333;
+    color: #4CAF50;
+    font-size: 1.25em;
+}
+
+.update-centered-box {
+    text-align: left;
+    padding: 1.25em;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 0.625em;
+    margin: 1.5em;
+}
+
+.update-search-container {
+    text-align: center;
+    padding: 1.25em;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 0.625em;
+}
+
+.update-search-input {
+    width: calc(100% - 1.375em);
+    padding: 0.625em;
+    margin: 0.625em 0;
+    border: 0.0625em solid #ccc;
+    border-radius: 0.3125em;
+    font-size: 1.25em;
+}
+
+.update-search-button {
+    padding: 0.625em 1.25em;
+    margin: 0.625em 0.3125em;
+    border: none;
+    border-radius: 0.3125em;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 1.25em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.update-search-button:hover {
+    background-color: #4CAF50;
+}
+
+.update-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1em;
+    background-color: #333;
+    color: #4CAF50;
+    font-size: 1.25em;
+}  
+
+.update-footer-image {
+    max-width: 3em;
+    min-width: 3em;
+    width: 100%;
+    max-height: 3em;
+    min-height: 3em;
+    height: 100%;
+    object-fit: contain;
+    margin-right: 3em;
+}
+
+.update-loading-container {
+    background-color: #ffffff;
+    width: 100vw;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 0.25em 0.5em rgba(0, 0, 0, 0.1);
+    border-radius: 0.5em;
+    padding: 2em;
+}

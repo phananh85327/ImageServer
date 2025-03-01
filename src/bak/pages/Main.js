@@ -15,7 +15,6 @@ const Main = () => {
     const [tagDelete, setTagDelete] = useState(null);
     const [tagError, setTagError] = useState('');
     const [tagsSearch, setTagsSearch] = useState([]);
-    const [tagsSearchError, setTagsSearchError] = useState('');
 
     const [photoLoading, setPhotoLoading] = useState(true);
     const [photos, setPhotos] = useState([]);
@@ -26,6 +25,7 @@ const Main = () => {
     const [photoError, setPhotoError] = useState('');
 
     const [itemAdvanceSearch, setItemAdvanceSearch] = useState(false);
+    const [addPhoto, setAddPhoto] = useState(false);
     const [maxPage, setMaxPage] = useState(1);
     const [page, setPage] = useState(1);
 
@@ -39,9 +39,8 @@ const Main = () => {
 
     // Tags effect
     useEffect(() => {
-        let url = new URL(FetchData.tagUrl);
+        const url = new URL(FetchData.tagUrl);
         const fetchTagsGet = async () => {
-            url = new URL(FetchData.tagsUrl);
             const result = await FetchData.sendRequest(url.href, FetchData.httpGet);
             if (result === null) {
                 setTagLoading(false);
@@ -53,13 +52,12 @@ const Main = () => {
         }
         const fetchTagPost = async () => {
             const addTag = document.getElementById('tbTagAddName');
-            if ((addTag === null) || (addTag.value === '') || (tags.map(tag => tag.tagName).includes(addTag.value))) {
+            if ((addTag === null) || (addTag.value === '')) {
                 setTagError('Invalid tag name');
             } else {
                 setTagError('');
-                url.searchParams.set('userID', user.userID);
-                url.searchParams.set('tagName', addTag.value);
-                const result = await FetchData.sendRequest(url.href, FetchData.httpPost);
+                const newTag = new TagRequestResponse('', addTag.value);
+                const result = await FetchData.sendRequest(url.href, FetchData.httpPost, newTag);
                 if (result === null) {
                     setTagLoading(false);
                     navigate('/error');
@@ -83,7 +81,6 @@ const Main = () => {
                 updateTag.updateName = false;
             } else {
                 setTagError('');
-                url.searchParams.set('userID', user.userID);
                 updateTag.tagName = tag.value;
                 updateTag.updateName = false;
                 const result = await FetchData.sendRequest(url.href, FetchData.httpPut, updateTag);
@@ -103,7 +100,6 @@ const Main = () => {
                 setTagError('Invalid tag');
             } else {
                 setTagError('');
-                url.searchParams.set('userID', user.userID);
                 url.searchParams.set('tagID', deleteTag.tagID);
                 const result = await FetchData.sendRequest(url.href, FetchData.httpDelete);
                 if (result === null) {
@@ -131,85 +127,45 @@ const Main = () => {
 
     // Photo effect
     useEffect(() => {
-        let url = new URL(FetchData.photoUrl);
+        const url = new URL(FetchData.photUrl);
         const fetchPhotosGet = async () => {
-            url = new URL(FetchData.photosUrl);
             const search = document.getElementById('tbSearch');
-            if (search === null) {
+            const cameraMake = document.getElementById('tbCameraMake');
+            const cameraModel = document.getElementById('tbCameraModel');
+            const exposureTime = document.getElementById('tbExposureTime');
+            const aperture = document.getElementById('tbAperture');
+            const ISO = document.getElementById('tbISO');
+            const focalLength = document.getElementById('tbFocalLength');
+            const GPSLatitude = document.getElementById('tbGPSLatitude');
+            const GPSLongitude = document.getElementById('tbGPSLongitude');
+            const dateTaken = document.getElementById('tbDateTaken');
+            if (search === undefined || cameraMake === undefined || cameraModel === undefined || exposureTime === undefined || aperture === undefined || ISO === undefined || focalLength === undefined || GPSLatitude === undefined || GPSLongitude === undefined || dateTaken === undefined) {
                 console.log('Invalid elements');
             } else {
-                if (itemAdvanceSearch) {
-                    const cameraMake = document.getElementById('tbCameraMake');
-                    const cameraModel = document.getElementById('tbCameraModel');
-                    const exposureTime = document.getElementById('tbExposureTime');
-                    const aperture = document.getElementById('tbAperture');
-                    const ISO = document.getElementById('tbISO');
-                    const focalLength = document.getElementById('tbFocalLength');
-                    const GPSLatitude = document.getElementById('tbGPSLatitude');
-                    const GPSLongitude = document.getElementById('tbGPSLongitude');
-                    const dateTaken = document.getElementById('tbDateTaken');
-                    if ((cameraMake === null) || (cameraModel === null) || (exposureTime === null) || (aperture === null) || (ISO === null) || (focalLength === null) || (GPSLatitude === null) || (GPSLongitude === null) || (dateTaken === null)) {
-                        console.log('Invalid elements');
-                    } else {
-                        if (cameraMake.value !== '') {
-                            url.searchParams.set('metadata.cameraMake', cameraMake.value);
-                        }
-                        if (cameraModel.value !== '') {
-                            url.searchParams.set('metadata.cameraModel', cameraModel.value);
-                        }
-                        if (exposureTime.value !== '') {
-                            url.searchParams.set('metadata.exposureTime', exposureTime.value);
-                        }
-                        if (aperture.value !== '') {
-                            url.searchParams.set('metadata.aperture', aperture.value);
-                        }
-                        if (ISO.value !== '') {
-                            url.searchParams.set('metadata.ISO', ISO.value);
-                        }
-                        if (focalLength.value !== '') {
-                            url.searchParams.set('metadata.focalLength', focalLength.value);
-                        }
-                        if (GPSLatitude.value !== '') {
-                            url.searchParams.set('metadata.GPSLatitude', GPSLatitude.value);
-                        }
-                        if (GPSLongitude.value !== '') {
-                            url.searchParams.set('metadata.GPSLongitude', GPSLongitude.value);
-                        }
-                        if (dateTaken.value !== '') {
-                            url.searchParams.set('metadata.dateTaken', dateTaken.value);
-                        }
-                    }
-                }
-                if (search.value !== '') {
-                    url.searchParams.set('keyword', search.value);
-                }
-                if (tagsSearch.length > 0) {
-                    for (let i = 0; i < tagsSearch.length; i++) {
-                        url.searchParams.append('tagIDs', tagsSearch[i]);
-                    }
-                }
-                url.searchParams.set('start', (page - 1) * FetchData.pageRows);
-                url.searchParams.set('end', page * FetchData.pageRows);
-                const result = await FetchData.sendRequest(url.href, FetchData.httpGet);
+                const metadata = new MetadataRequestResponse(cameraMake.value, cameraModel.value, exposureTime.value, aperture.value, ISO.value, focalLength.value, GPSLatitude.value, GPSLongitude.value, dateTaken.value);
+                const photo = new PhotoRequestResponse();
+                photo.keyword = search.value;
+                photo.metadata = metadata;
+                photo.tagIDs = tagsSearch;
+                photo.start = (page - 1) * FetchData.pageRows;
+                photo.end = page * FetchData.pageRows;
+                const result = await FetchData.sendRequest(url.href, FetchData.httpGet, photo);
                 if (result === null) {
                     setPhotoLoading(false);
                     navigate('/error');
                     return;
                 }
-                const photos = Object.values(result).map(photo => PhotoRequestResponse.fromObject(photo));
-                const max = photos.length === 0 ? 0 : Math.floor(photos[0].count / FetchData.pageRows) + (photos[0].count % FetchData.pageRows ? 1 : 0);
-                setMaxPage(max);
-                setPhotos(photos);
+                setPhotos(Object.values(result).map(photo => PhotoRequestResponse.fromObject(photo)));
             }
             setPhotoLoading(false);
         }
-        const fetchPhotoPost = async () => {
+        const fetchPhotosPost = async () => {
             const title = document.getElementById('tbTtile');
             const description = document.getElementById('tbDescription');
-            if (title === null || title.value === '') {
+            if (title === undefined || title.value === '') {
                 console.log('Invalid title');
                 setPhotoError('Invalid title');
-            } else if (description === null) {
+            } else if (description === undefined || description.value === '') {
                 console.log('Invalid description');
                 setPhotoError('Invalid description');
             } else if (photoUpload === null) {
@@ -218,29 +174,25 @@ const Main = () => {
             } else {
                 url.searchParams.set('userID', user.userID);
                 const newPhoto = new PhotoRequestResponse();
-                newPhoto.image = photoUpload;
                 newPhoto.title = title.value;
                 newPhoto.description = description.value;
-                if (photoTags.length > 0) {
-                    for (let i = 0; i < photoTags.length; i++) {
-                        url.searchParams.append('tagIDs', photoTags[i]);
-                    }
-                }
-                const result = await FetchData.sendRequest(url.href, FetchData.httpPost, newPhoto);
+                newPhoto.image = photoUpload;
+                newPhoto.tagIDs = photoTags;
+                const result = await FetchData.sendRequest(url.href, FetchData.httpGet, newPhoto);
                 if (result === null) {
                     setPhotoLoading(false);
                     navigate('/error');
                     return;
                 }
-                const max = Math.floor(result.count / FetchData.pageRows) + (result.count % FetchData.pageRows ? 1 : 0);
-                setMaxPage(max);
+                setPhotos([...photos, PhotoRequestResponse.fromObject(newPhoto)]);
+                setAddPhoto(false);
             }
             setPhotoAdd(false);
             setPhotoUpload(null);
             setPhotoTags([]);
             setPhotoLoading(false);
         }
-        const fetchPhotoDelete = async (index) => {
+        const fetchPhotosDelete = async (index) => {
             const deletePhoto = photos.find((_, i) => i === index);
             if (deletePhoto === undefined) {
                 console.log('Invalid photo');
@@ -255,13 +207,13 @@ const Main = () => {
                 }
                 setPhotoDelete(null);
             }
-            fetchPhotosGet();
+            setPhotoLoading(false);
         }
         if (photoLoading) {
-            if (photoDelete !== null) {
-                fetchPhotoDelete(photoDelete);
-            } else if (photoAdd === true) {
-                fetchPhotoPost();
+            if (photoDelete) {
+                fetchPhotosDelete(photoDelete);
+            } else if (photoAdd) {
+                fetchPhotosPost();
             } else {
                 fetchPhotosGet();
             }
@@ -286,42 +238,21 @@ const Main = () => {
         setItemAdvanceSearch(itemAdvanceSearch === false);
     }
 
-    const handleExport = () => {
-        const photosBase64 = photos.map(photo => photo.imageBase64);
-        photosBase64.forEach((base64Data, index) => {
-            const filename = `photo_${index + 1}.jpg`;
-            downloadBase64File(base64Data, filename);
-        });
-    }
-
-    const downloadBase64File = (base64Data, filename) => {
-        // Create a Blob from the base64 string
-        const linkSource = base64Data;
-        const downloadLink = document.createElement("a");
-        const fileName = filename;
-    
-        downloadLink.href = linkSource;
-        downloadLink.download = fileName;
-        downloadLink.click();
-    }    
-
     const handleAddSearchTag = () => {
-        const addTag = document.getElementById('tbSearchTag');
-        if ((addTag === null) || (tags.map(tag => tag.tagName).includes(addTag.value) && !tagsSearch.includes(addTag.value))) {
-            const tag = tags.find(tag => tag.tagName === addTag.value);
-            setTagsSearch([...tagsSearch, tag.tagID]);
-            setTagsSearchError('');
+        const tag = document.getElementById('tbSearchTag');
+        if ((tag === null) || (tags.includes(tag.value) && !tagsSearch.includes(tag.value))) {
+            setTagsSearch.push(tag.value)
         } else {
-            setTagsSearchError('Invalid tag');
+            console.log('Invalid tag');
         }
     }
 
     const handleDisplayTagsSearch = () => {
         return (
-            tagsSearch.map((tagIndex, index) => (
-                <React.Fragment key={index}>
-                    <button className='general-button' onClick={() => handleDeleteTagSearch(index)}>{tags.find(tag => tag.tagID === tagIndex).tagName}</button>
-                </React.Fragment>
+            tagsSearch.map((tag, index) => (
+                <>
+                    <button className='general-button' onClick={() => handleDeleteTagSearch(index)}>{tag}</button>
+                </>
             ))
         )
     }
@@ -355,11 +286,11 @@ const Main = () => {
     }
 
     const handleAddPhoto = () => {
-        setPhotoLoading(true);
+        setPhotoAdd(true);
     }
 
     const handleCloseAddPhoto = () => {
-        setPhotoAdd(photoAdd === false);
+        setAddPhoto(addPhoto === false);
     }
     
     const handleFileChange = (e) => {
@@ -379,22 +310,20 @@ const Main = () => {
     }
 
     const handleAddPhotoTag = () => {
-        const addTag = document.getElementById('tbAddTag');
-        if ((addTag === null) || (tags.map(tag => tag.tagName).includes(addTag.value) && !photoTags.includes(addTag.value))) {
-            const tag = tags.find(tag => tag.tagName === addTag.value);
-            setPhotoTags([...photoTags, tag.tagID]);
-            setPhotoError('');
+        const tag = document.getElementById('tbAddTag');
+        if ((tag === null) || (tags.includes(tag.value) && !photoTags.includes(tag.value))) {
+            setPhotoTags.push(tag.value)
         } else {
-            setPhotoError('Invalid tag');
+            console.log('Invalid tag');
         }
     }
     
     const handleDisplayPhotoTags = () => {
         return (
-            photoTags.map((tagIndex, index) => (
-                <React.Fragment key={index}>
-                    <button className='general-button' onClick={() => handleDeletePhotoTag(index)}>{tags.find(tag => tag.tagID === tagIndex).tagName}</button>
-                </React.Fragment>
+            photoTags.map((tag, index) => (
+                <>
+                    <button className='general-button' onClick={() => handleDeletePhotoTag(index)}>{tag}</button>
+                </>
             ))
         )
     }
@@ -403,10 +332,21 @@ const Main = () => {
         setPhotoTags(photoTags.filter((_, i) => i !== index));
     }
 
+    const handleDisplayMaxPage = () => {
+        const max = photos.length === 0 ? 0 : (photos[0].count / FetchData.pageRows) + (photos[0].count % FetchData.pageRows);
+        setMaxPage(max);
+        return (
+            max === 0 ? (
+                <label>No photos</label>
+            ) : (
+                <label>{max}</label>
+            )
+        )
+    }
+
     const handleNavigatePhotoDetail = (index) => {
         if (0 <= index && index < photos.length) {
-            const photoDetailObject = photos[index];
-            sessionStorage.setItem(FetchData.photoDetail, JSON.stringify(photoDetailObject));
+            sessionStorage.setItem(FetchData.photoDetail, photos[index]);
             navigate('/detail');
         } else {
             console.log('Invalid photo');
@@ -419,29 +359,11 @@ const Main = () => {
     }
 
     const handleSelectPage = (newPage) => {
-        if (newPage >= 1 && newPage <= maxPage) {
+        if (1 <= newPage && newPage <= maxPage) {
             setPage(newPage);
             setPhotoLoading(true);
         }
-    };
-    
-    const PaginationButtons = ({ page, maxPage, handleSelectPage }) => (
-        <div className='pagination-buttons'>
-            <button className='general-button' onClick={() => handleSelectPage(page - 1)} disabled={page === 1}>Previous Page</button>
-    
-            {page > 2 && <button className='general-button' onClick={() => handleSelectPage(1)}>1</button>}
-            {page > 3 && <label className='general-label-header'>...</label>}
-    
-            {page - 1 >= 1 && <button className='general-button' onClick={() => handleSelectPage(page - 1)}>{page - 1}</button>}
-            <button className='general-button' disabled>{page}</button>
-            {page + 1 <= maxPage && <button className='general-button' onClick={() => handleSelectPage(page + 1)}>{page + 1}</button>}
-    
-            {page < maxPage - 2 && <label className='general-label-header'>...</label>}
-            {page < maxPage - 1 && <button className='general-button' onClick={() => handleSelectPage(maxPage)}>{maxPage}</button>}
-    
-            <button className='general-button' onClick={() => handleSelectPage(page + 1)} disabled={page === maxPage}>Next Page</button>
-        </div>
-    );
+    }
 
     return (
         <div className='body'>
@@ -458,10 +380,9 @@ const Main = () => {
                 </div>
             </div>
             <div className='search-container'>
-                <input id='tbSearch' className='search-input' placeholder='Photo title or Description' type='text' />
-                <button className='general-button' onClick={handleItemSearch}>Search</button>
-                <button className='general-button' onClick={handleItemAdvanceSearch}>Advance search</button>
-                <button className='general-button' onClick={handleExport}>Export</button>
+                <input id='tbSearch' className='search-input' placeholder='Photo title || descriptiondescription' type='text' />
+                <button className='search-button' onClick={handleItemSearch}>Search</button>
+                <button className='advance-search-button' onClick={handleItemAdvanceSearch}>Advance search</button>
                 {
                     itemAdvanceSearch && (
                         <>
@@ -470,28 +391,22 @@ const Main = () => {
                             <label className='search-label'>Camera model: </label>
                             <input id='tbCameraModel' className='search-input' type='text' />
                             <label className='search-label'>Exposure time: </label>
-                            <input id='tbExposureTime' className='search-input' type='number' step='any' />
+                            <input id='tbExposureTime' className='search-input' type='number' step="any" />
                             <label className='search-label'>Aperture: </label>
-                            <input id='tbAperture' className='search-input' type='number' step='any' />
+                            <input id='tbAperture' className='search-input' type='number' step="any" />
                             <label className='search-label'>ISO: </label>
                             <input id='tbISO' className='search-input' type='number' />
                             <label className='search-label'>Focal length: </label>
-                            <input id='tbFocalLength' className='search-input' type='number' step='any' />
+                            <input id='tbFocalLength' className='search-input' type='number' step="any" />
                             <label className='search-label'>GPS latitude: </label>
-                            <input id='tbGPSLatitude' className='search-input' type='number' step='any' />
+                            <input id='tbGPSLatitude' className='search-input' type='number' step="any" />
                             <label className='search-label'>GPS longitude: </label>
-                            <input id='tbGPSLongitude' className='search-input' type='number' step='any' />
+                            <input id='tbGPSLongitude' className='search-input' type='number' step="any" />
                             <label className='search-label'>Date taken: </label>
                             <input id='tbDateTaken' className='search-input' type='datetime-local' />
                             <label className='search-label'>Tag: </label>
                             <input id='tbSearchTag' className='search-input' type='text' />
-                            {
-                                tagsSearchError !== '' && (
-                                    <label className='general-label-error'>{tagsSearchError}</label>
-                                )
-                            }
                             <button className='general-button' onClick={handleAddSearchTag}>Add tag</button>
-                            <br />
                             {
                                 handleDisplayTagsSearch()
                             }
@@ -531,28 +446,21 @@ const Main = () => {
                 }
             </div>
             {
-                photoAdd ? (
+                addPhoto ? (
                     <div className='centered-box'>
                         <label className='general-label-error'>{photoError}</label>
-                        <br />
-                        <label className='general-label-header'>Photo: </label>
-                        <input className='general-file-input' type='file' accept='.jpg, .jpeg' onChange={(e) => handleFileChange(e)} />
-                        <br />
-                        <label className='general-label-header'>Title: </label>
+                        <label className='general-label'>Photo: </label>
+                        <input type="file" accept=".png, .jpg, .jpeg, .gif" onChange={(e) => handleFileChange(e)} />
+                        <label className='general-label-error'>Title: </label>
                         <input id='tbTtile' className='general-input' type='text' />
-                        <br />
-                        <label className='general-label-header'>Description: </label>
+                        <label className='general-label'>Description: </label>
                         <textarea id='tbDescription' className='item-textarea' />
-                        <br />
-                        <label className='general-label-header'>Tag: </label>
+                        <label className='general-label'>Tag: </label>
                         <input id='tbAddTag' className='general-input' type='text' />
-                        <br />
                         <button className='general-button' onClick={handleAddPhotoTag}>Add tag</button>
-                        <br />
                         {
                             handleDisplayPhotoTags()
                         }
-                        <br />
                         <button className='general-button' onClick={handleAddPhoto}>Upload photo</button>
                         <button className='general-button' onClick={handleCloseAddPhoto}>Cancel</button>
                     </div>
@@ -564,17 +472,13 @@ const Main = () => {
             }
             <div className='centered-box'>
                 {
-                    maxPage === 0 ? (
-                        <label className='general-label-header'>No photos</label>
-                    ) : (
-                        <label className='general-label-header'>{page} / {maxPage}</label>
-                    )
+                    handleDisplayMaxPage()
                 }
                 {
                     photos.map((item, index) => (
                         <div key={index} className='item-row'>
                             <div className='item-header' onClick={() => handleNavigatePhotoDetail(index)}>
-                                <img id={`imgHeader${index}`} className='item-image' src={item.imageBase64 === null || item.imageBase64 === '' ? null : item.imageBase64} alt='No image' />
+                                <img id={`imgHeader${index}`} className='item-image' src={item.imageBase64 === null || item.imageBase64 === '' ? null : item.imageBase64} alt="No image" />
                                 <button className='general-button' onClick={() => handleDeletePhoto(index)}>Delete photo</button>
                                 <label className='general-label-header'>{item.title}</label>
                             </div>
@@ -582,12 +486,37 @@ const Main = () => {
                     ))
                 }
                 {
-                    maxPage > 0 && <PaginationButtons page={page} maxPage={maxPage} handleSelectPage={handleSelectPage} />
+                    maxPage > 0 && (
+                        <>
+                            {
+                                <button onClick={() => handleSelectPage(page - 1)}>Previous</button>
+                            }
+                            {
+                                page - 1 >= 1 && (
+                                    <button onClick={() => handleSelectPage(page - 1)}>{page - 1}</button>
+                                )
+                            }
+                            <button disabled={true}>{page}</button>
+                            {
+                                page + 2 <= maxPage && (
+                                    <button disabled={true}>...</button>
+                                )
+                            }
+                            {
+                                page + 1 <= maxPage && (
+                                    <button onClick={() => handleSelectPage(page + 1)}>{page + 1}</button>
+                                )
+                            }
+                            {
+                                <button onClick={() => handleSelectPage(page + 1)}>Next</button>
+                            }
+                        </>
+                    )
                 }
             </div>
             {
                 (tagLoading || photoLoading) && (
-                    <Popup open={true} position='center' closeOnDocumentClick={false}>
+                    <Popup open={true} position="center" closeOnDocumentClick={false}>
                         <div className='loading-container'>
                             <label className='general-label-warning'>Loading data please wait...</label>
                         </div>
