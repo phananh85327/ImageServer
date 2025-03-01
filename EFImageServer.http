@@ -1,0 +1,6 @@
+@EFImageServer_HostAddress = http://localhost:5073
+
+GET {{EFImageServer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
