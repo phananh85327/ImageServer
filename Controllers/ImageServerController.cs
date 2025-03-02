@@ -777,6 +777,7 @@ namespace EFImageServer.Controllers
             var exposureTime = exposureTimeRaw ?? string.Empty;
             if (exposureTimeRaw != null && exposureTimeRaw.Contains("/"))
             {
+                exposureTimeRaw = exposureTimeRaw.Replace(" sec", string.Empty);
                 var parts = exposureTimeRaw.Split('/');
                 if (parts.Length == 2 && double.TryParse(parts[0], out double numerator) && double.TryParse(parts[1], out double denominator))
                 {
@@ -786,6 +787,7 @@ namespace EFImageServer.Controllers
 
             // Aperture
             var aperture = subIfd?.GetDescription(ExifDirectoryBase.TagFNumber) ?? string.Empty;
+            if (string.IsNullOrEmpty(aperture) == false) aperture = aperture.Replace("f/", string.Empty);
 
             // ISO
             var iso = subIfd?.GetDescription(ExifDirectoryBase.TagIsoEquivalent) ?? string.Empty;
