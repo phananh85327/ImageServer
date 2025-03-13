@@ -1126,13 +1126,13 @@ namespace EFImageServer.Controllers
                 var fileStream = new FileStream(backupFilePath, FileMode.Open, FileAccess.Read);
                 var fileSize = fileStream.Length;
 
-                // Return the file as a download stream
-                if (fileSize > 20971520) return File(fileStream, "application/octet-stream", fileName);
-
                 var emailSubject = "Backup File Created Successful";
                 var emailBody = "Backup file for all photos have been created successfully.";
 
                 await SendEmailNotification(user.Email, emailSubject, emailBody, backupFilePath);
+
+                // Return the file as a download stream
+                if (fileSize > 20971520) return File(fileStream, "application/octet-stream", fileName);
 
                 return Ok();
             }
