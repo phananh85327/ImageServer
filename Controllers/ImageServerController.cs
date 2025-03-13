@@ -1129,12 +1129,10 @@ namespace EFImageServer.Controllers
                 var emailSubject = "Backup File Created Successful";
                 var emailBody = "Backup file for all photos have been created successfully.";
 
-                await SendEmailNotification(user.Email, emailSubject, emailBody, backupFilePath);
+                await SendEmailNotification(user.Email, emailSubject, emailBody);
 
                 // Return the file as a download stream
-                if (fileSize > 20971520) return File(fileStream, "application/octet-stream", fileName);
-
-                return Ok();
+                return File(fileStream, "application/octet-stream", fileName);
             }
             catch (Exception ex)
             {
