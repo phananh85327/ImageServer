@@ -1176,6 +1176,11 @@ namespace EFImageServer.Controllers
                 // Perform database restore
                 await RestoreDatabaseAsync(backupFilePath);
 
+                var emailSubject = "Backup File Restored Successful";
+                var emailBody = "Backup file for all photos have been restored successfully.";
+
+                await SendEmailNotification(user.Email, emailSubject, emailBody, backupFilePath);
+
                 return Ok();
             }
             catch (Exception ex)
