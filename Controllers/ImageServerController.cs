@@ -316,18 +316,19 @@ namespace EFImageServer.Controllers
         #endregion
 
         #region Photos
-        // GET: api/Photos
         [HttpGet("Photos")]
         public async Task<ActionResult<IEnumerable<PhotosDTO>>> GetPhotos([FromQuery] GetImageRequest image)
         {
-            var tagsQuery = from pt in _context.PhotoTags
-                            group pt by pt.PhotoID into g
-                            select new
-                            {
-                                PhotoID = g.Key,
-                                Tags = g.ToList()
-                            };
+            // Step 1: Filter tags directly in the database using indexing
+            var photoIDsForTags = image.TagIDs.Length > 0
+                ? await _context.PhotoTags
+                    .Where(pt => image.TagIDs.Contains(pt.TagID))
+                    .Select(pt => pt.PhotoID)
+                    .Distinct()
+                    .ToListAsync()
+                : null;
 
+            // Step 2: Query photos using explicit joins and LIKE for filtering
             var query = from p in _context.Photos
                         join m in _context.Metadata on p.PhotoID equals m.PhotoID into metadataJoin
                         from m in metadataJoin.DefaultIfEmpty()
@@ -340,30 +341,43 @@ namespace EFImageServer.Controllers
                             UploadedBy = u.Username
                         };
 
+            // Step 3: Apply filters using LIKE for text matching
             if (!string.IsNullOrEmpty(image.Keyword))
             {
-                query = query.Where(p => p.Photos.Title.Contains(image.Keyword) || p.Photos.Description.Contains(image.Keyword))
-                    .OrderByDescending(p => p.Photos.Title.Contains(image.Keyword))
-                    .ThenByDescending(p => p.Photos.Description.Contains(image.Keyword));
+                query = query.Where(p =>
+                    p.Photos.Title.Contains(image.Keyword) ||
+                    p.Photos.Description.Contains(image.Keyword));
             }
 
             if (!string.IsNullOrEmpty(image.Metadata.CameraMake))
+            {
                 query = query.Where(p => p.Metadata.CameraMake == image.Metadata.CameraMake);
+            }
 
             if (!string.IsNullOrEmpty(image.Metadata.CameraModel))
+            {
                 query = query.Where(p => p.Metadata.CameraModel == image.Metadata.CameraModel);
+            }
 
             if (!string.IsNullOrEmpty(image.Metadata.ExposureTime))
+            {
                 query = query.Where(p => p.Metadata.ExposureTime == image.Metadata.ExposureTime);
+            }
 
             if (!string.IsNullOrEmpty(image.Metadata.Aperture))
+            {
                 query = query.Where(p => p.Metadata.Aperture == image.Metadata.Aperture);
+            }
 
             if (!string.IsNullOrEmpty(image.Metadata.ISO))
+            {
                 query = query.Where(p => p.Metadata.ISO == image.Metadata.ISO);
+            }
 
             if (!string.IsNullOrEmpty(image.Metadata.FocalLength))
+            {
                 query = query.Where(p => p.Metadata.FocalLength == image.Metadata.FocalLength);
+            }
 
             if (!string.IsNullOrEmpty(image.Metadata.DateTaken))
             {
@@ -371,25 +385,28 @@ namespace EFImageServer.Controllers
                 query = query.Where(p => p.Metadata.DateTaken.HasValue && p.Metadata.DateTaken >= dateTaken);
             }
 
-            var count = await query.CountAsync();
-            var photos = await query.ToArrayAsync();
+            if (photoIDsForTags != null)
+            {
+                query = query.Where(p => photoIDsForTags.Contains(p.Photos.PhotoID));
+            }
 
+            // Step 4: Filtering for GPS coordinates
+            var photos = await query.ToArrayAsync();
             if (double.TryParse(image.Metadata.GPSLatitude, out var GPSLatitude))
             {
                 photos = photos.Where(p => CheckApproximateLocation(p.Metadata.GPSLatitude, GPSLatitude)).ToArray();
             }
+
             if (double.TryParse(image.Metadata.GPSLongitude, out var GPSLongitude))
             {
                 photos = photos.Where(p => CheckApproximateLocation(p.Metadata.GPSLongitude, GPSLongitude)).ToArray();
             }
-            if (image.TagIDs.Length > 0)
-            {
-                var photoIDs = photos.Select(p => p.Photos.PhotoID).ToArray();
-                var photoTags = await _context.PhotoTags.Where(t => photoIDs.Contains(t.PhotoID)).ToArrayAsync();
 
-                photos = photos.Where(p => image.TagIDs.All(t => photoTags.Where(t => t.PhotoID == p.Photos.PhotoID).Select(t => t.TagID).Contains(t))).ToArray();
-            }
-            var sortedPhotos = photos.Skip(image.Start).Take(image.End - image.Start).Select(p => new PhotosDTO(p.Photos, p.UploadedBy, count)).ToArray();
+            // Step 5: Pagination
+            var count = photos.Length;
+            var sortedPhotos = photos.Skip(image.Start).Take(image.End - image.Start)
+                .Select(p => new PhotosDTO(p.Photos, p.UploadedBy, count))
+                .ToArray();
 
             return sortedPhotos;
         }
