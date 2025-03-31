@@ -56,8 +56,8 @@ namespace EFImageServer.DTO_Models
                     break;
             }
 
-            return $"data:{mimeType};base64,{base64String}";
+            var fileName = Path.GetFileName(filePath);
+            return $"data:{mimeType};base64,{base64String};filename={fileName}";
         }
-
     }
 }
