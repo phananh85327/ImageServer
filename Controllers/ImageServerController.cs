@@ -391,20 +391,32 @@ namespace EFImageServer.Controllers
             }
 
             // Step 4: Filtering for GPS coordinates
-            var photos = await query.ToArrayAsync();
-            if (double.TryParse(image.Metadata.GPSLatitude, out var GPSLatitude))
+            PhotosResponse[] photos;
+            var count = await query.CountAsync();
+            var checkGPSLatitude = double.TryParse(image.Metadata.GPSLatitude, out var GPSLatitude);
+            var checkGPSLongtitude = double.TryParse(image.Metadata.GPSLongitude, out var GPSLongtitude);
+            if (checkGPSLatitude || checkGPSLongtitude)
             {
-                photos = photos.Where(p => CheckApproximateLocation(p.Metadata.GPSLatitude, GPSLatitude)).ToArray();
-            }
+                photos = await query.ToArrayAsync();
+                if (checkGPSLatitude)
+                {
+                    photos = photos.Where(p => CheckApproximateLocation(p.Metadata.GPSLatitude, GPSLatitude)).ToArray();
+                }
 
-            if (double.TryParse(image.Metadata.GPSLongitude, out var GPSLongitude))
+                if (checkGPSLongtitude)
+                {
+                    photos = photos.Where(p => CheckApproximateLocation(p.Metadata.GPSLongitude, GPSLongtitude)).ToArray();
+                }
+
+                photos = photos.Skip(image.Start).Take(image.End - image.Start).ToArray();
+            }
+            else
             {
-                photos = photos.Where(p => CheckApproximateLocation(p.Metadata.GPSLongitude, GPSLongitude)).ToArray();
+                photos = await query.Skip(image.Start).Take(image.End - image.Start).ToArrayAsync();
             }
 
             // Step 5: Pagination
-            var count = photos.Length;
-            var sortedPhotos = photos.Skip(image.Start).Take(image.End - image.Start)
+            var sortedPhotos = photos
                 .Select(p => new PhotosDTO(p.Photos, p.UploadedBy, count))
                 .ToArray();
 
@@ -1194,7 +1206,7 @@ namespace EFImageServer.Controllers
                 var emailSubject = "Backup File Restored Successful";
                 var emailBody = "Backup file for all photos have been restored successfully.";
 
-                await SendEmailNotification(user.Email, emailSubject, emailBody, backupFilePath);
+                await SendEmailNotification(user.Email, emailSubject, emailBody);
 
                 return Ok();
             }
