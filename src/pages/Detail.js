@@ -168,6 +168,14 @@ const Detail = () => {
         }
     }
 
+    const handleDisplayPhoto = (imageBase64) => {
+        if (!imageBase64) return null;
+
+        const parts = imageBase64.split(';');
+        const cleanBase64 = `${parts[0]};${parts[1]}`;
+        return cleanBase64;
+    };
+
     return (
         <div className='body'>
             <div className='header'>
@@ -196,7 +204,7 @@ const Detail = () => {
                 </div>
                 <div className='item-row'>
                     <div>
-                        <img id='imgHeader' className='item-image-super' src={photo.imageBase64 === null || photo.imageBase64 === '' ? null : photo.imageBase64} alt="No image" />
+                        <img id='imgHeader' className='item-image-super' src={handleDisplayPhoto(photo.imageBase64)} alt="No image" />
                     </div>
                     <div>
                         <textarea id='tbDescription' className='item-textarea' defaultValue={photo.description} />
@@ -216,7 +224,7 @@ const Detail = () => {
                     similarPhotos.map((item, index) => (
                         <div key={index} className='item-row'>
                             <div className='item-header' onClick={() => handleNavigatePhotoDetail(index)}>
-                                <img id={`imgHeader${index}`} className='item-image' src={item.imageBase64 === null || item.imageBase64 === '' ? null : item.imageBase64} alt="No image" />
+                                <img id={`imgHeader${index}`} className='item-image' src={handleDisplayPhoto(item.imageBase64)} alt="No image" />
                                 <label className='general-label-header'>{item.title}</label>
                             </div>
                         </div>

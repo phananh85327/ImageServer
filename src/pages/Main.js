@@ -288,8 +288,9 @@ const Main = () => {
 
     const handleExport = () => {
         photos.forEach((photo, index) => {
-            const base64Data = photo.imageBase64;
-            const filename = photo.fileName || `photo_${index + 1}.jpg`;
+            const parts = photo.imageBase64.split(';');
+            const base64Data = `${parts[0]};${parts[1]}`;
+            const filename = parts.length === 3 ? parts[2].split('=')[1] : `photo_${index + 1}.jpg`;
             downloadBase64File(base64Data, filename);
         });
     };
@@ -412,6 +413,14 @@ const Main = () => {
             console.log('Invalid photo');
         }
     }
+
+    const handleDisplayPhoto = (imageBase64) => {
+        if (!imageBase64) return null;
+
+        const parts = imageBase64.split(';');
+        const cleanBase64 = `${parts[0]};${parts[1]}`;
+        return cleanBase64;
+    };
 
     const handleDeletePhoto = (index) => {
         setPhotoDelete(index);
@@ -574,7 +583,7 @@ const Main = () => {
                     photos.map((item, index) => (
                         <div key={index} className='item-row'>
                             <div className='item-header' onClick={() => handleNavigatePhotoDetail(index)}>
-                                <img id={`imgHeader${index}`} className='item-image' src={item.imageBase64 === null || item.imageBase64 === '' ? null : item.imageBase64} alt='No image' />
+                                <img id={`imgHeader${index}`} className='item-image' src={handleDisplayPhoto(item.imageBase64)} alt='No image' />
                                 <button className='general-button' onClick={() => handleDeletePhoto(index)}>Delete photo</button>
                                 <label className='general-label-header'>{item.title}</label>
                             </div>
