@@ -14,7 +14,7 @@ namespace EFImageServer.DTO_Models
             ISO = string.Empty;
             FocalLength = string.Empty;
             GPSLatitude = string.Empty;
-            GPSLongitude = string.Empty;
+            GPSLongtitude = string.Empty;
             DateTaken = string.Empty;
         }
 
@@ -27,7 +27,7 @@ namespace EFImageServer.DTO_Models
             ISO = metadata.ISO;
             FocalLength = metadata.FocalLength;
             GPSLatitude = metadata.GPSLatitude;
-            GPSLongitude = metadata.GPSLongitude;
+            GPSLongtitude = metadata.GPSLongitude;
             DateTaken = metadata.DateTaken.HasValue ? metadata.DateTaken.Value.ToString(Constants.DATETIME_FORMAT) : string.Empty;
         }
 
@@ -38,7 +38,7 @@ namespace EFImageServer.DTO_Models
         public string ISO { get; set; }
         public string FocalLength { get; set; }
         public string GPSLatitude { get; set; }
-        public string GPSLongitude { get; set; }
+        public string GPSLongtitude { get; set; }
         public string DateTaken { get; set; }
     }
 }

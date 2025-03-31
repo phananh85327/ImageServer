@@ -394,7 +394,7 @@ namespace EFImageServer.Controllers
             PhotosResponse[] photos;
             var count = await query.CountAsync();
             var checkGPSLatitude = double.TryParse(image.Metadata.GPSLatitude, out var GPSLatitude);
-            var checkGPSLongtitude = double.TryParse(image.Metadata.GPSLongitude, out var GPSLongtitude);
+            var checkGPSLongtitude = double.TryParse(image.Metadata.GPSLongtitude, out var GPSLongtitude);
             if (checkGPSLatitude || checkGPSLongtitude)
             {
                 photos = await query.ToArrayAsync();
@@ -967,6 +967,7 @@ namespace EFImageServer.Controllers
 
             for (var i = 0; i < importData.Length; i++)
             {
+                importData[i].Title = importData[i].Title.Replace(".jpeg", "").Replace(".jpg", "");
                 var result = await ProcessPhoto(userID, importData[i].Image, importData[i].Title, string.Empty, Array.Empty<int>(), importOnlyPhotos);
                 if (string.IsNullOrEmpty(result.ErrorMessage) == false)
                 {
@@ -975,10 +976,10 @@ namespace EFImageServer.Controllers
                 }
             }
 
-            var emailSubject = emailSuccess ? "Photo Import Successful" : "Photo Import Completed with Errors";
+            /*var emailSubject = emailSuccess ? "Photo Import Successful" : "Photo Import Completed with Errors";
             var emailBody = emailSuccess ? "All photos have been successfully imported." : string.Join("\n", emailMessages);
 
-            await SendEmailNotification(user.Email, emailSubject, emailBody);
+            await SendEmailNotification(user.Email, emailSubject, emailBody);*/
 
             return emailSuccess ? Ok() : StatusCode(StatusCodes.Status500InternalServerError, "Some photos failed to import.");
         }
@@ -1025,10 +1026,10 @@ namespace EFImageServer.Controllers
                 }
             }
 
-            var emailSubject = emailSuccess ? "Photo Import Successful" : "Photo Import Completed with Errors";
+            /*var emailSubject = emailSuccess ? "Photo Import Successful" : "Photo Import Completed with Errors";
             var emailBody = emailSuccess ? "All photos have been successfully imported." : string.Join("\n", emailMessages);
 
-            await SendEmailNotification(user.Email, emailSubject, emailBody);
+            await SendEmailNotification(user.Email, emailSubject, emailBody);*/
 
             return emailSuccess ? Ok() : StatusCode(StatusCodes.Status500InternalServerError, "Some photos failed to import.");
         }
