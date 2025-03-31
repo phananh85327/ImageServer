@@ -287,13 +287,13 @@ const Main = () => {
     }
 
     const handleExport = () => {
-        const photosBase64 = photos.map(photo => photo.imageBase64);
-        photosBase64.forEach((base64Data, index) => {
-            const filename = `photo_${index + 1}.jpg`;
+        photos.forEach((photo, index) => {
+            const base64Data = photo.imageBase64;
+            const filename = photo.fileName || `photo_${index + 1}.jpg`;
             downloadBase64File(base64Data, filename);
         });
-    }
-
+    };
+    
     const downloadBase64File = (base64Data, filename) => {
         // Create a Blob from the base64 string
         const linkSource = base64Data;
