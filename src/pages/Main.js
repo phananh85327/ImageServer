@@ -584,9 +584,9 @@ const Main = () => {
                         <div key={index} className='item-row'>
                             <div className='item-header' onClick={() => handleNavigatePhotoDetail(index)}>
                                 <img id={`imgHeader${index}`} className='item-image' src={handleDisplayPhoto(item.imageBase64)} alt='No image' />
-                                <button className='general-button' onClick={() => handleDeletePhoto(index)}>Delete photo</button>
                                 <label className='general-label-header'>{item.title}</label>
                             </div>
+                            <button className='general-button' onClick={() => handleDeletePhoto(index)}>Delete photo</button>
                         </div>
                     ))
                 }
